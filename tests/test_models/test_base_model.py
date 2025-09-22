@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+print ("OK")
 """Unit tests for BaseModel class"""
 
 import unittest

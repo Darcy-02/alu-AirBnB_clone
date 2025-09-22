@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+
+print ("OK")
 """BaseModel class for AirBnB clone project"""
 
 import uuid
@@ -39,4 +41,5 @@ class BaseModel:
         obj_dict["created_at"] = self.created_at.isoformat()
         obj_dict["updated_at"] = self.updated_at.isoformat()
         return obj_dict
+
 
