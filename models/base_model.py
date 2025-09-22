@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-print ("OK")
 """BaseModel class for AirBnB clone project"""
 
 import uuid
@@ -28,11 +27,13 @@ class BaseModel:
     def __str__(self):
         """String representation of the instance"""
         return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
+    
 
     def save(self):
         """Update updated_at and save to storage"""
         self.updated_at = datetime.now()
         storage.save()
+        print("OK")
 
     def to_dict(self):
         """Return a dictionary representation of the instance"""
