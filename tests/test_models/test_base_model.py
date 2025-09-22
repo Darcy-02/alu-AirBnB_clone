@@ -20,4 +20,4 @@ class TestBaseModel(unittest.TestCase):
         self.assertTrue(hasattr(obj, "updated_at"))
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
