@@ -6,11 +6,12 @@ from datetime import datetime
 from models import storage
 
 
+
 class BaseModel:
     """Base class for all models"""
 
     def __init__(self, *args, **kwargs):
-        """Initialize a new BaseModel instance"""
+        """Initialize a new BaseModel instance"""   
         if kwargs:
             for key, value in kwargs.items():
                 if key == "created_at" or key == "updated_at":

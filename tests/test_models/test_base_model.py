@@ -1,23 +1,25 @@
 #!/usr/bin/python3
-"""Unit tests for BaseModel class"""
+"""Manual test for BaseModel"""
 
-import unittest
 from models.base_model import BaseModel
 
-class TestBaseModel(unittest.TestCase):
-    """Tests for BaseModel class"""
+# 1️⃣ Create instance
+my_model = BaseModel()
+my_model.name = "My First Model"
+my_model.my_number = 89
 
-    def test_instance_creation(self):
-        """Test that a BaseModel instance is created properly"""
-        obj = BaseModel()
-        self.assertIsInstance(obj, BaseModel)
+# Print initial object (__str__ output)
+print(my_model)
 
-    def test_attributes(self):
-        """Test that the instance has correct attributes"""
-        obj = BaseModel()
-        self.assertTrue(hasattr(obj, "id"))
-        self.assertTrue(hasattr(obj, "created_at"))
-        self.assertTrue(hasattr(obj, "updated_at"))
+# 2️⃣ Call save() to update updated_at
+my_model.save()
+print(my_model)
 
-if __name__ == "__main__":
-    unittest.main()
+# 3️⃣ Convert to dictionary (to_dict)
+my_model_json = my_model.to_dict()
+print(my_model_json)
+
+# 4️⃣ Print JSON content with types
+print("JSON of my_model:")
+for key in my_model_json.keys():
+    print("\t{}: ({}) - {}".format(key, type(my_model_json[key]), my_model_json[key]))
