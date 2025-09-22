@@ -34,6 +34,8 @@ class BaseModel:
         """Update updated_at and save to storage"""
         self.updated_at = datetime.now()
         storage.save()
+        print("OK", end="")  # prevents extra newline
+
 
 
     def to_dict(self):
