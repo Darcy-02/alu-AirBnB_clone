@@ -1,25 +1,113 @@
 #!/usr/bin/python3
-"""Manual test for BaseModel"""
+"""Unit tests for BaseModel"""
 
+import unittest
+import uuid
+from datetime import datetime
+from unittest.mock import patch
 from models.base_model import BaseModel
 
-# 1️⃣ Create instance
-my_model = BaseModel()
-my_model.name = "My First Model"
-my_model.my_number = 89
 
-# Print initial object (__str__ output)
-print(my_model)
+class TestBaseModel(unittest.TestCase):
+    """Test cases for BaseModel class"""
 
-# 2️⃣ Call save() to update updated_at
-my_model.save()
-print(my_model)
+    def setUp(self):
+        """Set up test fixtures before each test method"""
+        self.model = BaseModel()
 
-# 3️⃣ Convert to dictionary (to_dict)
-my_model_json = my_model.to_dict()
-print(my_model_json)
+    def test_instance_creation(self):
+        """Test BaseModel instance creation"""
+        self.assertIsInstance(self.model, BaseModel)
+        self.assertTrue(hasattr(self.model, 'id'))
+        self.assertTrue(hasattr(self.model, 'created_at'))
+        self.assertTrue(hasattr(self.model, 'updated_at'))
 
-# 4️⃣ Print JSON content with types
-print("JSON of my_model:")
-for key in my_model_json.keys():
-    print("\t{}: ({}) - {}".format(key, type(my_model_json[key]), my_model_json[key]))
+    def test_id_is_string(self):
+        """Test that id is a string"""
+        self.assertIsInstance(self.model.id, str)
+
+    def test_id_is_unique(self):
+        """Test that each instance has a unique id"""
+        model2 = BaseModel()
+        self.assertNotEqual(self.model.id, model2.id)
+
+    def test_created_at_is_datetime(self):
+        """Test that created_at is a datetime object"""
+        self.assertIsInstance(self.model.created_at, datetime)
+
+    def test_updated_at_is_datetime(self):
+        """Test that updated_at is a datetime object"""
+        self.assertIsInstance(self.model.updated_at, datetime)
+
+    def test_str_representation(self):
+        """Test string representation of BaseModel"""
+        string = str(self.model)
+        self.assertIn("[BaseModel]", string)
+        self.assertIn(self.model.id, string)
+
+    def test_save_updates_updated_at(self):
+        """Test that save() updates updated_at"""
+        old_updated_at = self.model.updated_at
+        self.model.save()
+        self.assertNotEqual(old_updated_at, self.model.updated_at)
+
+    def test_to_dict_returns_dict(self):
+        """Test that to_dict returns a dictionary"""
+        model_dict = self.model.to_dict()
+        self.assertIsInstance(model_dict, dict)
+
+    def test_to_dict_contains_class(self):
+        """Test that to_dict contains __class__ key"""
+        model_dict = self.model.to_dict()
+        self.assertIn('__class__', model_dict)
+        self.assertEqual(model_dict['__class__'], 'BaseModel')
+
+    def test_to_dict_datetime_format(self):
+        """Test that datetime objects are converted to ISO format strings"""
+        model_dict = self.model.to_dict()
+        self.assertIsInstance(model_dict['created_at'], str)
+        self.assertIsInstance(model_dict['updated_at'], str)
+
+    def test_to_dict_with_custom_attributes(self):
+        """Test to_dict with custom attributes"""
+        self.model.name = "My First Model"
+        self.model.my_number = 89
+        model_dict = self.model.to_dict()
+        self.assertEqual(model_dict['name'], "My First Model")
+        self.assertEqual(model_dict['my_number'], 89)
+
+    def test_kwargs_initialization(self):
+        """Test initialization with kwargs"""
+        kwargs = {
+            'id': 'test-id-123',
+            'created_at': '2023-01-01T00:00:00.000000',
+            'updated_at': '2023-01-01T00:00:01.000000',
+            'name': 'Test Model'
+        }
+        model = BaseModel(**kwargs)
+        self.assertEqual(model.id, 'test-id-123')
+        self.assertEqual(model.name, 'Test Model')
+        self.assertIsInstance(model.created_at, datetime)
+        self.assertIsInstance(model.updated_at, datetime)
+
+    def test_kwargs_ignores_class(self):
+        """Test that __class__ key is ignored in kwargs"""
+        kwargs = {'__class__': 'ShouldBeIgnored', 'id': 'test-123'}
+        model = BaseModel(**kwargs)
+        self.assertEqual(model.__class__.__name__, 'BaseModel')
+
+    @patch('models.storage')
+    def test_new_instance_calls_storage_new(self, mock_storage):
+        """Test that new instance calls storage.new()"""
+        model = BaseModel()
+        mock_storage.new.assert_called_once_with(model)
+
+    @patch('models.storage')
+    def test_save_calls_storage_save(self, mock_storage):
+        """Test that save() calls storage.save()"""
+        self.model.save()
+        mock_storage.save.assert_called_once()
+
+
+if __name__ == '__main__':
+    unittest.main()
