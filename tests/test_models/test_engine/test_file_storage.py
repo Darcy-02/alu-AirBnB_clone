@@ -14,10 +14,7 @@ class TestFileStorage(unittest.TestCase):
         # Clean file before tests
         if os.path.exists("file.json"):
             os.remove("file.json")
-        # Reset the class attribute properly
         FileStorage._FileStorage__objects = {}
-        # Also reset the instance
-        self.storage._FileStorage__objects = {}
 
     def test_all_empty(self):
         """all() returns empty dict initially"""
