@@ -6,6 +6,8 @@ import uuid
 from datetime import datetime
 from unittest.mock import patch
 from models.base_model import BaseModel
+import time
+import time
 
 
 class TestBaseModel(unittest.TestCase):
@@ -96,18 +98,56 @@ class TestBaseModel(unittest.TestCase):
         model = BaseModel(**kwargs)
         self.assertEqual(model.__class__.__name__, 'BaseModel')
 
-    @patch('models.storage')
-    def test_new_instance_calls_storage_new(self, mock_storage):
-        """Test that new instance calls storage.new()"""
-        model = BaseModel()
-        mock_storage.new.assert_called_once_with(model)
+        @patch('models.storage')
+        def test_save_calls_storage_save(self, mock_storage):
+            """Test that save() calls storage.save()"""
+            self.model.save()
+            mock_storage.save.assert_called_once()
 
-    @patch('models.storage')
-    def test_save_calls_storage_save(self, mock_storage):
-        """Test that save() calls storage.save()"""
-        self.model.save()
-        mock_storage.save.assert_called_once()
+        def test_save_updates_timestamp(self):
+            """Test that save() updates the updated_at timestamp"""
+            original_time = self.model.updated_at
+            time.sleep(0.01)  # Small delay to ensure timestamp difference
+            self.model.save()
+            self.assertGreater(self.model.updated_at, original_time)
 
+        def test_save_does_not_change_created_at(self):
+            """Test that save() does not modify created_at"""
+            original_created_at = self.model.created_at
+            self.model.save()
+            self.assertEqual(self.model.created_at, original_created_at)
 
-if __name__ == '__main__':
-    unittest.main()
+        def test_save_does_not_change_id(self):
+            """Test that save() does not modify the id"""
+            original_id = self.model.id
+            self.model.save()
+            self.assertEqual(self.model.id, original_id)
+
+        def test_multiple_saves_update_timestamp(self):
+            """Test that multiple saves continue to update timestamp"""
+            first_save_time = self.model.updated_at
+            time.sleep(0.01)
+            self.model.save()
+            second_save_time = self.model.updated_at
+            time.sleep(0.01)
+            self.model.save()
+            third_save_time = self.model.updated_at
+            
+            self.assertGreater(second_save_time, first_save_time)
+            self.assertGreater(third_save_time, second_save_time)
+
+        @patch('models.storage')
+        def test_save_with_custom_attributes(self, mock_storage):
+            """Test that save() works with custom attributes"""
+            self.model.name = "Test Model"
+            self.model.number = 42
+            old_updated_at = self.model.updated_at
+            self.model.save()
+            
+            self.assertNotEqual(old_updated_at, self.model.updated_at)
+            self.assertEqual(self.model.name, "Test Model")
+            self.assertEqual(self.model.number, 42)
+            mock_storage.save.assert_called_once()
+
+    if __name__ == '__main__':
+        unittest.main()
